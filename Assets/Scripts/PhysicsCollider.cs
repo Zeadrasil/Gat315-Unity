@@ -1,11 +1,16 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
 public class PhysicsCollider : MonoBehaviour
 {
-    public string status;
+    [SerializeField] private GameObject fx;
+    [NonSerialized] public string status;
+    [NonSerialized] public string lastStatus;
     private float displayTimer = 0.0f;
+    [NonSerialized] public Vector3 contact;
+    [NonSerialized] public Vector3 normal;
     private void Update()
     {
         displayTimer += Time.deltaTime;
@@ -16,8 +21,12 @@ public class PhysicsCollider : MonoBehaviour
         if (status != status2 && !string.IsNullOrEmpty(status))
         {
             displayTimer = 0;
+            lastStatus = status;
         }
         status = status2;
+        contact = collision.contacts[0].point;
+        normal = collision.contacts[0].normal;
+        Instantiate(fx, contact, Quaternion.LookRotation(normal));
     }
     private void OnCollisionStay(Collision collision)
     {
@@ -25,6 +34,7 @@ public class PhysicsCollider : MonoBehaviour
         if (status != status2 && !string.IsNullOrEmpty(status))
         {
             displayTimer = 0;
+            lastStatus = status;
         }
         status = status2;
     }
@@ -34,6 +44,7 @@ public class PhysicsCollider : MonoBehaviour
         if (status != status2 && !string.IsNullOrEmpty(status))
         {
             displayTimer = 0;
+            lastStatus = status;
         }
         status = status2;
     }
@@ -43,9 +54,9 @@ public class PhysicsCollider : MonoBehaviour
         if (status != status2 && !string.IsNullOrEmpty(status))
         {
             displayTimer = 0;
+            lastStatus = status;
         }
         status = status2;
-
     }
     private void OnTriggerStay(Collider other)
     {
@@ -53,6 +64,7 @@ public class PhysicsCollider : MonoBehaviour
         if (status != status2 && !string.IsNullOrEmpty(status))
         {
             displayTimer = 0;
+            lastStatus = status;
         }
         status = status2;
     }
@@ -62,17 +74,29 @@ public class PhysicsCollider : MonoBehaviour
         if (status != status2 && !string.IsNullOrEmpty(status))
         {
             displayTimer = 0;
+            lastStatus = status;
         }
         status = status2;
     }
 
     private void OnGUI()
     {
-        if (displayTimer > 1 && displayTimer < 10)
+        if (displayTimer < 1)
+        {
+            
+        }
+        else if (displayTimer < 10)
         {
             GUI.skin.label.fontSize = 16;
             Vector2 screen = Camera.main.WorldToScreenPoint(transform.position);
             GUI.Label(new Rect(screen.x, Screen.height - screen.y, 250, 70), status);
         }
+    }
+
+    private void OnDrawGizmos()
+    {
+        Gizmos.color = Color.red;
+        Gizmos.DrawSphere(contact, 0.1f);
+        Gizmos.DrawLine(contact, contact + normal);
     }
 }
